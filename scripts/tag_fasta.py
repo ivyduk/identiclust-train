@@ -1,7 +1,6 @@
 import sys
 import re, os
 from shutil import copyfile
-import sys, getopt, json
 
 def tag_fasta(samples, sp, start):
 
@@ -25,10 +24,4 @@ def tag_fasta(samples, sp, start):
         IDS[ID]=filename
         copyfile(tempfile, filename)
         os.remove(tempfile)
-    print (IDS)
-
-    with open("dics/%s.json" %sp, 'w') as f:
-        json_str = json.dumps(IDS, indent=4)
-        f.write(json_str)
-    f.close()
     return IDS
