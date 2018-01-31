@@ -21,15 +21,16 @@ rule tag_samples:
         fastaSp1=expand("species1/{sample}.fasta", sample=SAMPLES),
         fastaSp2=expand("species2/{sample}.fasta", sample=SAMPLES2),
     output:
-        'dics/SP1.json',
-        'dics/SP2.json'
+        'dics/samples.json',
+        expand("Genomes/{sample}.fasta", sample=SAMPLES),
+        expand("Genomes/{sample}.fasta", sample=SAMPLES2)
     message: "---- Tagging samples of species folders -----"
     params: sp1 = "SP1", start1 = 0, sp2 = "SP2", start2 = LEN_SAMPLES
     script:
         "scripts/tagging.py"
 
 rule gene_annotation:
-    input: "species1/{sample}.fasta"
+    input: "Genomes/{sample}.fasta"
     output:
         gff = 'Annotated/{sample}.gff', genes = 'Annotated/{sample}.genes'
     message: "---- Predicting genes with prodigal -----"
