@@ -13,9 +13,9 @@ except:
 
 dest = 'Genomes/'
 for f in snakemake.input.fastaSp1:
-    shutil.move(f, dest)
+    shutil.copy(f, dest)
 for f in snakemake.input.fastaSp2:
-    shutil.move(f, dest)
+    shutil.copy(f, dest)
 
 with open("dics/samples.json", 'w') as f:
         json_str = json.dumps(b, indent=4)
