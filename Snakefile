@@ -13,8 +13,7 @@ LEN_SAMPLES = len(SAMPLES)
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
-  input: expand("Annotated/{sample}.gff", sample=SAMPLES),
-         expand("Annotated/{sample}.genes", sample=SAMPLES)
+  input: expand("Genomes/{sample}.genome", sample=SAMPLES),
 
 rule tag_samples:
     input:
@@ -30,8 +29,25 @@ rule tag_samples:
         "scripts/tagging.py"
 
 rule gene_annotation:
-    input: "Genomes/{sample}.fasta"
+    input: "Genomes/{sample}.gff"
     output:
         gff = 'Annotated/{sample}.gff', genes = 'Annotated/{sample}.genes'
     message: "---- Predicting genes with prodigal -----"
     shell: """prodigal -i {input} -m -f gff -o {output.gff} -d {output.genes}"""
+
+rule intergenic_extraction:
+    input: "Annotated/{sample}.gff"
+    output:
+        "Genomes/{sample}.genome"
+    message: "---------Creating genome files------------"
+    run: 
+            import csv, re   
+            f = open(input[0], "r")
+            strings = re.findall(r'seqlen=(\d+);seqhdr="(\S+).*\"', f.read())
+            with open(output[0], 'w') as csvfile:
+                print ("writing genome file")
+                writer = csv.writer(csvfile, delimiter='\t')
+                writer.writerow(['chrom','size'])
+                for string in strings:
+                    writer.writerow([string[1],string[0]]) 
+    
