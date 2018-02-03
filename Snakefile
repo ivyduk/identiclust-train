@@ -13,7 +13,7 @@ LEN_SAMPLES = len(SAMPLES)
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
-  input: expand("Genomes/{sample}.genome", sample=SAMPLES),
+  input: expand("intergenic/{sample}.bed", sample=SAMPLES),
 
 rule tag_samples:
     input:
@@ -35,7 +35,7 @@ rule gene_annotation:
     message: "---- Predicting genes with prodigal -----"
     shell: """prodigal -i {input} -m -f gff -o {output.gff} -d {output.genes}"""
 
-rule intergenic_extraction:
+rule genome_file_creation:
     input: "Annotated/{sample}.gff"
     output:
         "Genomes/{sample}.genome"
@@ -46,8 +46,15 @@ rule intergenic_extraction:
             strings = re.findall(r'seqlen=(\d+);seqhdr="(\S+).*\"', f.read())
             with open(output[0], 'w') as csvfile:
                 print ("writing genome file")
-                writer = csv.writer(csvfile, delimiter='\t')
+                writer = csv.writer(csvfile, lineterminator="\n", delimiter='\t')
                 writer.writerow(['chrom','size'])
                 for string in strings:
-                    writer.writerow([string[1],string[0]]) 
+                    writer.writerow([string[1],string[0]])
+
+rule intergenic_extraction_bed:
+    input: "Genomes/{sample}.genome",
+            "Annotated/{sample}.gff"
+    output: "intergenic/{sample}.bed"
+    message: "---------Creating bed files to obtain intergenic sequences------------"
+    shell: """bedtools complement -i {input[1]} -g {input[0]} > {output}"""  
     
