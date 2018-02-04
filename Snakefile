@@ -13,7 +13,7 @@ LEN_SAMPLES = len(SAMPLES)
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
-  input: expand("intergenic/{sample}.bed", sample=SAMPLES),
+  input: expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES),
 
 rule tag_samples:
     input:
@@ -56,5 +56,13 @@ rule intergenic_extraction_bed:
             "Annotated/{sample}.gff"
     output: "intergenic/{sample}.bed"
     message: "---------Creating bed files to obtain intergenic sequences------------"
-    shell: """bedtools complement -i {input[1]} -g {input[0]} > {output}"""  
+    shell: """bedtools complement -i {input[1]} -g {input[0]} | awk '(($2 < $3) || (($2 == $3) && ($2 != 0)))' > {output}"""
+
+rule intergenic_extraction_fasta:
+    input:  "intergenic/{sample}.bed",
+            "Genomes/{sample}.fasta"
+    output:  "intergenic/{sample}intergenic.fasta",
+    message: "---------Creating fasta files with intergenic sequences------------"
+    shell: """bedtools getfasta -fi {input[1]} -bed {input[0]} -fo {output}"""
+
     
