@@ -13,8 +13,9 @@ LEN_SAMPLES = len(SAMPLES)
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
-  input: expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES),
-        expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES2)
+  input: 'clustering/allGenes.fasta',
+        "clustering/allintergenic.fasta"
+
 
 rule tag_samples:
     input:
@@ -40,7 +41,7 @@ rule genome_file_creation:
     input: "Annotated/{sample}.gff"
     output:
         "Genomes/{sample}.genome"
-    message: "---------Creating genome files------------"
+    message: "-------Creating genome files required by bedtools----------"
     run: 
             import csv, re   
             f = open(input[0], "r")
@@ -65,5 +66,22 @@ rule intergenic_extraction_fasta:
     output:  "intergenic/{sample}intergenic.fasta",
     message: "---------Creating fasta files with intergenic sequences------------"
     shell: """bedtools getfasta -fi {input[1]} -bed {input[0]} -fo {output}"""
+
+rule concatenate_gene_sequences:
+    input:  expand("Annotated/{sample}.genes", sample=SAMPLES),
+        expand("Annotated/{sample}.genes", sample=SAMPLES2)
+    output: "clustering/allGenes.fasta"
+    message: "---------Concatenating genes sequences to clustering------------"
+    shell: """cat {input} > {output}"""
+
+rule concatenate_intergenic_sequences:
+    input:  expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES),
+        expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES2)
+    output: "clustering/allintergenic.fasta"
+    message: "---------Concatenating intergenic sequences to clustering------------"
+    shell: """cat {input} > {output}"""
+
+
+
 
     
