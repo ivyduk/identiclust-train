@@ -14,6 +14,7 @@ SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
   input: expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES),
+        expand("intergenic/{sample}intergenic.fasta", sample=SAMPLES2)
 
 rule tag_samples:
     input:
@@ -29,7 +30,7 @@ rule tag_samples:
         "scripts/tagging.py"
 
 rule gene_annotation:
-    input: "Genomes/{sample}.gff"
+    input: "Genomes/{sample}.fasta"
     output:
         gff = 'Annotated/{sample}.gff', genes = 'Annotated/{sample}.genes'
     message: "---- Predicting genes with prodigal -----"
