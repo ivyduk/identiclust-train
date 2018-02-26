@@ -1,21 +1,25 @@
 """
 Author: Ivan Duque Aldana
 iaduquea@unal.edu.co
-Run: snakemake   -s Snakefile
+Run: snakemake  -s Snakefile
 """
 
-##--------------------------------------------------------------------------------------##
-## The list of samples to be processed
-##--------------------------------------------------------------------------------------##
 SAMPLES, = glob_wildcards("species1/{sample}.fasta")
 LEN_SAMPLES = len(SAMPLES)
 
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
-  input: 'clustering/allGenes.fasta',
-        "clustering/allintergenic.fasta"
-
+  input: "clustering/0.95-identitygene.clstr",
+            "clustering/0.95-identitygene",  
+            "matrix/0.95_BIN_gene.npy",
+            "matrix/0.95_FREQ_gene.npy",
+            "matrix/0.95_PERC_gene.npy",
+            "clustering/0.95-identityinter.clstr",
+            "clustering/0.95-identityinter",
+            "matrix/0.95_BIN_inter.npy",
+            "matrix/0.95_FREQ_inter.npy",
+            "matrix/0.95_PERC_inter.npy"     
 
 rule tag_samples:
     input:
@@ -80,6 +84,29 @@ rule concatenate_intergenic_sequences:
     output: "clustering/allintergenic.fasta"
     message: "---------Concatenating intergenic sequences to clustering------------"
     shell: """cat {input} > {output}"""
+
+rule clustering_cd_hit_iterative_Gene:  
+    input: "clustering/allGenes.fasta"
+    output: "clustering/0.95-identitygene.clstr",
+            "clustering/0.95-identitygene",  
+            "matrix/0.95_BIN_gene.npy",
+            "matrix/0.95_FREQ_gene.npy",
+            "matrix/0.95_PERC_gene.npy",
+    params: region = "gene" , samples_file = 'dics/samples.json'
+    message: "Iterative Clustering using cd-hit-est for genes"
+    shell: "python scripts/clustering_cdhit.py {input[0]} {params.region} {params.samples_file}"
+
+
+rule clustering_cd_hit_iterative_Intergenic:  
+    input: "clustering/allintergenic.fasta"
+    output: "clustering/0.95-identityinter.clstr",
+            "clustering/0.95-identityinter",
+            "matrix/0.95_BIN_inter.npy",
+            "matrix/0.95_FREQ_inter.npy",
+            "matrix/0.95_PERC_inter.npy"
+    params: region = "inter" , samples_file = 'dics/samples.json'
+    message: "Iterative Clustering using cd-hit-est for intergenic"
+    shell: "python scripts/clustering_cdhit.py {input[0]} {params.region} {params.samples_file}"
 
 
 
