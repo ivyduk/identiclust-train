@@ -66,7 +66,7 @@ def IterativeClusterSeqs(fasta_file, T, region_type, samples_file):
 
 			if not iterative:
 				key_sequences = []
-				representative = seqs[0][1] 
+				representative = next(s[1] for s in seqs if '*' in s[2]) 
 				representatives[representative] = {}
 				representatives[representative]["cluster_id"] = cluster
 				
@@ -84,7 +84,7 @@ def IterativeClusterSeqs(fasta_file, T, region_type, samples_file):
 						sequences[s[1]]['identity_to_rep'] = x
 				representatives[representative]['sequences'] = key_sequences
 			else:
-				representative = seqs[0][1]
+				representative = next(s[1] for s in seqs if '*' in s[2])
 				prev_key_sequences = prev_representatives[representative]['sequences'] 
 				key_sequences = prev_key_sequences 
 				representatives[representative] = {}

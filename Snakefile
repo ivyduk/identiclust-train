@@ -10,16 +10,16 @@ LEN_SAMPLES = len(SAMPLES)
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
 
 rule final:
-  input: "clustering/0.95-identitygene.clstr",
-            "clustering/0.95-identitygene",  
-            "matrix/0.95_BIN_gene.npy",
-            "matrix/0.95_FREQ_gene.npy",
-            "matrix/0.95_PERC_gene.npy",
-            "clustering/0.95-identityinter.clstr",
-            "clustering/0.95-identityinter",
-            "matrix/0.95_BIN_inter.npy",
-            "matrix/0.95_FREQ_inter.npy",
-            "matrix/0.95_PERC_inter.npy"     
+  input: "clustering/0.7-identitygene.clstr",
+            "clustering/0.7-identitygene",  
+            "matrix/0.7_BIN_gene.npy",
+            "matrix/0.7_FREQ_gene.npy",
+            "matrix/0.7_PERC_gene.npy",
+            "clustering/0.7-identityinter.clstr",
+            "clustering/0.7-identityinter",
+            "matrix/0.7_BIN_inter.npy",
+            "matrix/0.7_FREQ_inter.npy",
+            "matrix/0.7_PERC_inter.npy"     
 
 rule tag_samples:
     input:
@@ -88,7 +88,9 @@ rule concatenate_intergenic_sequences:
 rule clustering_cd_hit_iterative_Gene:  
     input: "clustering/allGenes.fasta"
     output: "clustering/0.95-identitygene.clstr",
-            "clustering/0.95-identitygene",  
+            "clustering/0.95-identitygene",
+            "dics/0.95repsgene.json",
+            "dics/0.95seqsgene.json",  
             "matrix/0.95_BIN_gene.npy",
             "matrix/0.95_FREQ_gene.npy",
             "matrix/0.95_PERC_gene.npy",
@@ -101,6 +103,8 @@ rule clustering_cd_hit_iterative_Intergenic:
     input: "clustering/allintergenic.fasta"
     output: "clustering/0.95-identityinter.clstr",
             "clustering/0.95-identityinter",
+            "dics/0.95repsinter.json",
+            "dics/0.95seqsinter.json",
             "matrix/0.95_BIN_inter.npy",
             "matrix/0.95_FREQ_inter.npy",
             "matrix/0.95_PERC_inter.npy"
@@ -108,7 +112,32 @@ rule clustering_cd_hit_iterative_Intergenic:
     message: "Iterative Clustering using cd-hit-est for intergenic"
     shell: "python scripts/clustering_cdhit.py {input[0]} {params.region} {params.samples_file}"
 
+rule clustering_mcl__Genic:  
+    input: "clustering/0.95-identitygene",
+           "dics/0.95repsgene.json",
+           "dics/0.95seqsgene.json"
+    output: "clustering/0.7-identitygene.clstr",
+            "clustering/0.7-identitygene",
+            "matrix/0.7_BIN_gene.npy",
+            "matrix/0.7_FREQ_gene.npy",
+            "matrix/0.7_PERC_gene.npy",
+    params: region = "gene" , samples_file = 'dics/samples.json'
+    message: "Clustering applying all vs all using Blast and mcl for genes"
+    shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file}"
 
+
+rule clustering_mcl_Intergenic:  
+    input: "clustering/0.95-identityinter",
+           "dics/0.95repsinter.json",
+           "dics/0.95seqsinter.json"
+    output: "clustering/0.7-identityinter.clstr",
+            "clustering/0.7-identityinter",
+            "matrix/0.7_BIN_inter.npy",
+            "matrix/0.7_FREQ_inter.npy",
+            "matrix/0.7_PERC_inter.npy"
+    params: region = "inter" , samples_file = 'dics/samples.json'
+    message: "Clustering applying all vs all using Blast and mcl for intergenic"
+    shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file}"""
 
 
     
