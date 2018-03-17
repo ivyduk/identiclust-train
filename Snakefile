@@ -8,18 +8,12 @@ SAMPLES, = glob_wildcards("species1/{sample}.fasta")
 LEN_SAMPLES = len(SAMPLES)
 
 SAMPLES2, = glob_wildcards("species2/{sample}.fasta")
+LEN_SAMPLES2 = len(SAMPLES2)
 
 rule final:
-  input: "clustering/0.7-identitygene.clstr",
-            "clustering/0.7-identitygene",  
-            "matrix/0.7_BIN_gene.npy",
-            "matrix/0.7_FREQ_gene.npy",
-            "matrix/0.7_PERC_gene.npy",
-            "clustering/0.7-identityinter.clstr",
-            "clustering/0.7-identityinter",
-            "matrix/0.7_BIN_inter.npy",
-            "matrix/0.7_FREQ_inter.npy",
-            "matrix/0.7_PERC_inter.npy"     
+  input: "models/finalized_model_gene.sav",
+         "models/finalized_model_inter.sav",
+         "models/finalized_model_both.sav"   
 
 rule tag_samples:
     input:
@@ -138,6 +132,43 @@ rule clustering_mcl_Intergenic:
     params: region = "inter" , samples_file = 'dics/samples.json'
     message: "Clustering applying all vs all using Blast and mcl for intergenic"
     shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file}"""
+
+rule train_model_random_forest_gene:
+    input: "matrix/0.7_PERC_gene.npy"
+    output: "models/finalized_model_gene.sav"
+    params: region = 'gene' ,samples_file = 'dics/samples.json', samples_SP2_number = LEN_SAMPLES2
+    message: "Training Model for genic clusters using Random Forest"
+    shell:"python scripts/train_model.py {input[0]} {params.region} {params.samples_file} {params.samples_SP2_number}"""
+
+
+rule train_model_random_forest_inter:
+    input: "matrix/0.7_PERC_inter.npy"
+    output: "models/finalized_model_inter.sav"
+    params: region = 'inter' ,samples_file = 'dics/samples.json', samples_SP2_number = LEN_SAMPLES2
+    message: "Training Model for intergenic clusters using Random Forest"
+    shell:"python scripts/train_model.py {input[0]} {params.region} {params.samples_file} {params.samples_SP2_number}"""
+
+rule join_gene_and_intergenic_matrix:
+    input: "matrix/0.7_PERC_gene.npy",
+            "matrix/0.7_PERC_inter.npy"
+    output: "matrix/0.7_PERC_both.npy"
+    run: 
+        import numpy as np
+        TrainGene=np.load(input[0])
+        TrainInter=np.load(input[1])
+        TotalMatrixTrain = np.concatenate((TrainGene, TrainInter), axis=1)
+        np.save("matrix/0.7_PERC_both", TotalMatrixTrain)
+
+rule train_model_random_forest_both:
+    input: "matrix/0.7_PERC_both.npy"
+    output: "models/finalized_model_both.sav"
+    params: region = 'both' ,samples_file = 'dics/samples.json', samples_SP2_number = LEN_SAMPLES2
+    message: "Training Model for both types of clusters using Random Forest"
+    shell:"python scripts/train_model.py {input[0]} {params.region} {params.samples_file} {params.samples_SP2_number}"""
+
+
+
+    
 
 
     
