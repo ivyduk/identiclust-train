@@ -19,7 +19,7 @@ def IterativeClusterSeqs(fasta_file, T, region_type, samples_file):
 	sequences = {}
 	clusters = {}
 	representatives = {}
-	percentages = [1, 0.99, 0.95]#, 0.9, 0.85, 0.8]
+	percentages = [1, 0.99, 0.95, 0.9, 0.85, 0.8]
 	prefix = '-identity%s' %region_type
 
 	if region_type=='gene':
