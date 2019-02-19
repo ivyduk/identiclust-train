@@ -5,22 +5,20 @@ this repo contains a workflow built using snakeMake Tool and its goal is to trai
 * Python ≥3.3
 * Snakemake 3.11.0
 
-The easiest way to setup these prerequisites is to use the Miniconda Python 3 distribution. The tutorial assumes that you are using either Linux or MacOS X. Both Snakemake and Miniconda work also under Windows, but the Windows shell is too different to be able to provide generic examples.
+The easiest way to setup these prerequisites is to use the Miniconda Python 3 distribution. The gudie assumes that you are using either Linux or MacOS X. Both Snakemake and Miniconda work also under Windows, but the Windows shell is too different to be able to provide generic examples.
 
-## Install miniconda on Linux
+## Install miniconda 3 on Linux
 ``` 
 $ wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
 $ bash Miniconda3-latest-Linux-x86_64.sh
 ```
 
-## Install miniconda on MacOSX
+## Install miniconda 3 on MacOSX
 ```
 $ curl https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o Miniconda3-latest-MacOSX-x86_64.sh
 $ bash Miniconda3-latest-MacOSX-x86_64.sh
 ```
-
-miniconda 3
 
 ## Create virtual environment for project and activate
 
