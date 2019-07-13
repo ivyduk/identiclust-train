@@ -33,7 +33,7 @@ rule gene_annotation:
     output:
         gff = 'Annotated/{sample}.gff', genes = 'Annotated/{sample}.genes'
     message: "---- Predicting genes with prodigal -----"
-    shell: """prodigal -i {input} -m -f gff -o {output.gff} -d {output.genes}"""
+    shell: """prodigal -i {input} -m -f gff -o {output.gff} -d {output.genes} -c"""
 
 rule genome_file_creation:
     input: "Annotated/{sample}.gff"
@@ -83,8 +83,8 @@ rule clustering_cd_hit_iterative_Gene:
     input: "clustering/allGenes.fasta"
     output: "clustering/0.8-identitygene.clstr",
             "clustering/0.8-identitygene",
-            "dics/0.8repsgene.json",
-            "dics/0.85seqsgene.json",  
+            "dics/0.8clstrsgene.json",
+            "dics/0.8seqsgene.json",  
             "matrix/0.8_BIN_gene.npy",
             "matrix/0.8_FREQ_gene.npy",
             "matrix/0.8_PERC_gene.npy",
@@ -97,7 +97,7 @@ rule clustering_cd_hit_iterative_Intergenic:
     input: "clustering/allintergenic.fasta"
     output: "clustering/0.8-identityinter.clstr",
             "clustering/0.8-identityinter",
-            "dics/0.8repsinter.json",
+            "dics/0.8clstrsinter.json",
             "dics/0.8seqsinter.json",
             "matrix/0.8_BIN_inter.npy",
             "matrix/0.8_FREQ_inter.npy",
@@ -108,8 +108,9 @@ rule clustering_cd_hit_iterative_Intergenic:
 
 rule clustering_mcl__Genic:  
     input: "clustering/0.8-identitygene",
-           "dics/0.8repsgene.json",
-           "dics/0.8seqsgene.json"
+           "dics/0.8clstrsgene.json",
+           "dics/0.8seqsgene.json",
+            "clustering/allGenes.fasta"           
     output: "clustering/0.7-identitygene.clstr",
             "clustering/0.7-identitygene",
             "matrix/0.7_BIN_gene.npy",
@@ -117,13 +118,14 @@ rule clustering_mcl__Genic:
             "matrix/0.7_PERC_gene.npy",
     params: region = "gene" , samples_file = 'dics/samples.json'
     message: "Clustering applying all vs all using Blast and mcl for genes"
-    shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file}"
+    shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file} {input[3]}"
 
 
 rule clustering_mcl_Intergenic:  
     input: "clustering/0.8-identityinter",
-           "dics/0.8repsinter.json",
-           "dics/0.8seqsinter.json"
+           "dics/0.8clstrsinter.json",
+           "dics/0.8seqsinter.json",
+           "clustering/allintergenic.fasta"
     output: "clustering/0.7-identityinter.clstr",
             "clustering/0.7-identityinter",
             "matrix/0.7_BIN_inter.npy",
@@ -131,7 +133,7 @@ rule clustering_mcl_Intergenic:
             "matrix/0.7_PERC_inter.npy"
     params: region = "inter" , samples_file = 'dics/samples.json'
     message: "Clustering applying all vs all using Blast and mcl for intergenic"
-    shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file}"""
+    shell: "python scripts/clustering_mcl.py {input[1]} {input[2]} {input[0]} {params.region} {params.samples_file} {input[3]}"""
 
 rule train_model_random_forest_gene:
     input: "matrix/0.7_PERC_gene.npy"
